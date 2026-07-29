@@ -29,12 +29,12 @@ export function haveTimeConflict(courseA: Course, courseB: Course): boolean {
         return false;
     }
     // Convertimos las fechas a un valor numérico para comparar las horas
-    const aStart = courseA.start_time.getTime();
-    const aEnd = courseA.end_time.getTime();
-    const bStart = courseB.start_time.getTime();
-    const bEnd = courseB.end_time.getTime();
+    const aStartMinutes = courseA.start_time.getUTCHours() * 60 + courseA.start_time.getUTCMinutes();
+    const aEndMinutes = courseA.end_time.getUTCHours() * 60 + courseA.end_time.getUTCMinutes();
+    const bStartMinutes = courseB.start_time.getUTCHours() * 60 + courseB.start_time.getUTCMinutes();
+    const bEndMinutes = courseB.end_time.getUTCHours() * 60 + courseB.end_time.getUTCMinutes();
 
-    return (aStart < bEnd && bStart < aEnd);
+    return (aStartMinutes < bEndMinutes && bStartMinutes < aEndMinutes);
 }
 
 export function hasScheduleConflicts(courses: Course[]): boolean {
@@ -52,7 +52,7 @@ export function hasScheduleConflicts(courses: Course[]): boolean {
 export function meetsPrerequisites(schedule: Course[], completedCourses: string[], allCoursesData: Course[]): boolean {
     // Obtenemos los IDs de los cursos completados basándonos en sus nombres
     const completedCourseIds = completedCourses.map(name => {
-        const c = allCoursesData.find(course => course.name === name);
+        const c = allCoursesData.find(course => course.name.trim().toLowerCase() === name.trim().toLowerCase());
         return c ? c.id : -1;
     }).filter(id => id !== -1);
 
@@ -63,8 +63,8 @@ export function meetsPrerequisites(schedule: Course[], completedCourses: string[
 
     return schedule.every(course => {
         if (!course.prerequisites || course.prerequisites.length === 0) return true;
-        
-        return course.prerequisites.every(prereq => 
+
+        return course.prerequisites.every(prereq =>
             availableCourses.has(prereq.prerequisite_course_id)
         );
     });
@@ -75,12 +75,9 @@ export function evaluateSchedule(schedule: Course[], configuration: any, allCour
     const reasons: string[] = [];
 
     // Validar materias obligatorias
-    const courseSet = getCourseNameSet(schedule);
-    const requiredCoursesSet = new Set<string>(configuration.requiredCourses || []);
-    if (!includesRequiredCourses(courseSet, requiredCoursesSet)) {
-        reasons.push("No contiene todas las materias obligatorias.");
+    if (schedule.length !== configuration.numberOfCourses) {
+        reasons.push("La cantidad de materias no coincide con la configuración solicitada.");
     }
-
     // Validar cruces
     if (configuration.avoidTimeConflicts && hasScheduleConflicts(schedule)) {
         reasons.push("El horario tiene cruces.");
