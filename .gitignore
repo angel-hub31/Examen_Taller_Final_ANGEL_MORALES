@@ -1,0 +1,13 @@
+# Dependencias
+node_modules/
+
+# Archivos de entorno y credenciales (¡Muy importante!)
+.env
+
+# Carpetas de editores, herramientas de IA y agentes locales
+.agents/
+.claude/
+.windsurf/
+
+# Archivos generados temporalmente (puedes ajustar según tu carpeta generated)
+generated/

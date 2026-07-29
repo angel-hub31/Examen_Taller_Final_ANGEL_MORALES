@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  
+}
+model courses {
+  id              Int            @id @default(autoincrement())
+  name            String         @db.VarChar(100)
+  day             String         @db.VarChar(20)
+  start_time      DateTime       @db.Time
+  end_time        DateTime       @db.Time
+  modality        String         @db.VarChar(20)
+  difficulty      String         @db.VarChar(20)
+  credits         Int
+  
+  // Relaciones más limpias
+  prerequisites   prerequisites[] @relation("CourseToPrerequisite")
+  prerequisiteFor prerequisites[] @relation("PrerequisiteToCourse")
+}
+
+model prerequisites {
+  course_id              Int
+  prerequisite_course_id Int
+
+  course             courses @relation("CourseToPrerequisite", fields: [course_id], references: [id])
+  prerequisiteCourse courses @relation("PrerequisiteToCourse", fields: [prerequisite_course_id], references: [id])
+
+  @@id([course_id, prerequisite_course_id])
+}
