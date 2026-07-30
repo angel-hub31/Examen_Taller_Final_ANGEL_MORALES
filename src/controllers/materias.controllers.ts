@@ -44,6 +44,9 @@ export const crearMateria = async (req: Request, res: Response) => {
 export const mostrarMateria = async (req: Request, res: Response) => {
     try {
         const courses = await prisma.courses.findMany({
+            orderBy: {
+                id: 'asc' // <--- AGREGA ESTO para ordenarlos siempre del menor ID al mayor de forma fija
+            },
             include: {
                 prerequisites: true
             }
