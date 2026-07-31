@@ -81,10 +81,10 @@ export function evaluateSchedule(schedule: Course[], configuration: any, allCour
         reasons.push("El número de materias debe estar entre 1 y 10.");
     }
 
-    if (configuration.maximumCredits < 0 || configuration.maximumCredits > 10) {
-        reasons.push("El límite máximo de créditos de estar entre 0 y 10 creditos.");
+    if (configuration.maximumCredits < 0 || configuration.maximumCredits > 12) {
+        reasons.push("El límite máximo de créditos de estar entre 0 y 12 creditos.");
     }
-    
+
     if (configuration.maximumDifficultCourses < 0 || configuration.maximumDifficultCourses>5) {
         reasons.push("El máximo de materias difíciles debe estar entre 0 y 5.");
     }
