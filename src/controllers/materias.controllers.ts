@@ -6,6 +6,11 @@ export const crearMateria = async (req: Request, res: Response) => {
     try {
         const { name, day, start_time, end_time, modality, difficulty, credits, prerequisites } = req.body;
         
+        const parsedCredits = Number(credits);
+        if (credits === undefined || credits === null || isNaN(parsedCredits) || parsedCredits <= 0 || parsedCredits>10) {
+            return res.status(400).json({ error: 'La cantidad de créditos debe estar entre 0 y 10' });
+        }
+
         // Prisma espera formato DateTime para los campos de tipo Time, agregamos una fecha base
         const baseDate = "1970-01-01T";
 
@@ -17,7 +22,7 @@ export const crearMateria = async (req: Request, res: Response) => {
                 end_time: new Date(`${baseDate}${end_time}Z`),
                 modality,
                 difficulty,
-                credits
+                credits: parsedCredits
             }
         });
 
@@ -45,7 +50,7 @@ export const mostrarMateria = async (req: Request, res: Response) => {
     try {
         const courses = await prisma.courses.findMany({
             orderBy: {
-                id: 'asc' // <--- AGREGA ESTO para ordenarlos siempre del menor ID al mayor de forma fija
+                id: 'asc' // 
             },
             include: {
                 prerequisites: true
@@ -90,6 +95,14 @@ export const actualizarMateria = async (req: Request, res: Response): Promise<an
         
         const { name, day, start_time, end_time, modality, difficulty, credits, prerequisites } = req.body;
         
+        let parsedCredits;
+        if (credits !== undefined) {
+            parsedCredits = Number(credits);
+            if (isNaN(parsedCredits) || parsedCredits <= 0) {
+                return res.status(400).json({ error: 'La cantidad de créditos debe ser un número entero mayor a 0.' });
+            }
+        }
+
         const baseDate = "1970-01-01T";
 
         // 1. Actualizamos los datos principales de la materia
@@ -103,7 +116,7 @@ export const actualizarMateria = async (req: Request, res: Response): Promise<an
                 ...(end_time && { end_time: new Date(`${baseDate}${end_time}Z`) }),
                 modality,
                 difficulty,
-                credits
+                ...(parsedCredits !== undefined && {credits: parsedCredits})
             }
         });
 

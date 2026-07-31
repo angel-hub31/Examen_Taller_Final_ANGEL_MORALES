@@ -1,5 +1,7 @@
 // src/services/validacion.ts
 
+import { config } from "process";
+
 // Interfaz basada en tu modelo de Prisma
 interface Course {
     id: number;
@@ -74,7 +76,25 @@ export function meetsPrerequisites(schedule: Course[], completedCourses: string[
 export function evaluateSchedule(schedule: Course[], configuration: any, allCoursesData: Course[]) {
     const reasons: string[] = [];
 
-    // Validar materias obligatorias
+    //
+    if (configuration.numberOfCourses < 1 || configuration.numberOfCourses > 10) {
+        reasons.push("El número de materias debe estar entre 1 y 10.");
+    }
+
+    if (configuration.maximumCredits < 0 || configuration.maximumCredits > 10) {
+        reasons.push("El límite máximo de créditos de estar entre 0 y 10 creditos.");
+    }
+    
+    if (configuration.maximumDifficultCourses < 0 || configuration.maximumDifficultCourses>5) {
+        reasons.push("El máximo de materias difíciles debe estar entre 0 y 5.");
+    }
+
+    const courseSet = getCourseNameSet(schedule);
+    if (!includesRequiredCourses(courseSet, new Set(configuration.requiredCourses || []))) {
+        reasons.push("No contiene todas las materias obligatorias.");
+    }
+
+    // Validar cantidad de materias
     if (schedule.length !== configuration.numberOfCourses) {
         reasons.push("La cantidad de materias no coincide con la configuración solicitada.");
     }
@@ -93,13 +113,13 @@ export function evaluateSchedule(schedule: Course[], configuration: any, allCour
 
     // Validar Dificultad (Paso 10 - Sección 32)
     const difficultCourses = schedule.filter(course => course.difficulty === "Alta");
-    if (difficultCourses.length > configuration.maximumDifficultCourses) {
+    if (configuration.maximumDifficultCourses !== undefined && difficultCourses.length > configuration.maximumDifficultCourses) {
         reasons.push("Supera el máximo de materias difíciles.");
     }
 
     // Validar Créditos (Paso 11 - Sección 33)
     const totalCredits = schedule.reduce((total, course) => total + course.credits, 0);
-    if (totalCredits > configuration.maximumCredits) {
+    if (configuration.maximumCredits !== undefined && totalCredits > configuration.maximumCredits) {
         reasons.push("Supera el máximo de créditos.");
     }
 
