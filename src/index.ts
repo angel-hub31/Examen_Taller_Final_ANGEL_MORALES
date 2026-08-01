@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import materiasRouter from "./routes/materias.js"
 import horariosRouter from "./routes/horarios.js"
+import { setupSwagger } from './config/swagger-jsdoc.js'; 
 
 const app = express();
 const PORT = 3000;
@@ -17,6 +18,9 @@ app.get("/", (req, res) => {
 // Usar las rutas del CRUD
 app.use('/', materiasRouter);
 app.use('/', horariosRouter);
+
+// Inicializar la documentación de Swagger
+setupSwagger(app); // 
 
 
 app.listen(PORT, () => {
